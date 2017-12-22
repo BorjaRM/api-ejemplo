@@ -3,6 +3,7 @@ var express = require("express"); //enrutar y cargar servidor
 var _app = express(); // Instanciamos un objeto
 var bodyParser = require("body-parser");
 var methodOverride = require("method-override");
+var libroCtrl = require("./controladores/libroCtrl");
 
 // Indicamos al objeto _app que utilice estas librerias
 _app.use(bodyParser.urlencoded({extended: false}));
@@ -17,77 +18,36 @@ _app.listen(3000, function() {
   console.log("Servidor creado");
 });
 
-var libros = [
-  {
-    "id": 0,
-    "title": "El señor de los anillos",
-    "autor": "J. R. R. Tolkien"
-  },
-  {
-    "id": 1,
-    "title": "Jim botron y lucas el maquinista",
-    "autor": "Michael Ender"
-  },
-  {
-    "id": 2,
-    "title": "Juego de Tronos",
-    "autor": "George R. Martin"
-  }
-]
-
-// Definimos que debe hacer cuando reciba una petición get
-router.get('/books/', function(req,res){
-  res.status(200).jsonp(libros);
+// PETICIONES GET
+// Devuelve todos los libros
+router.get('/books/', function(req,res,next){
+  var _librosCtrl = new libroCtrl(req,res,next);
+  _librosCtrl.getAll();
 });
 
-// Devuelve el titulo de un libro
-router.get('/books/title/:id', function(req,res){
-  var id = req.params.id;
-  res.status(200).jsonp(libros[id].title);
+// Devuelve un libro por su id
+router.get('/books/:id', function(req,res,next){
+  var _librosCtrl = new libroCtrl(req,res,next);
+  _librosCtrl.getBookId();
 });
 
-// Devuelve la información de un libro
-router.get('/books/:id', function(req,res){
-  var id = req.params.id;
-  res.status(200).jsonp(libros[id]);
+// PETICIONES POST
+// Añade un libro
+router.post('/books', function(req,res,next){
+  var _librosCtrl = new libroCtrl(req,res,next);
+  _librosCtrl.addBook();
 });
 
-router.post('/books', function(req,res){
-  var libro = req.body;
-  libros.push(libro);
-  res.status(200).jsonp(libros); //Le contestamos ok y devolvemos los libros
+// PETICIONES DELETE
+// Eliminar un libro
+router.delete('/books/:id', function(req,res,next){
+  var _librosCtrl = new libroCtrl(req,res,next);
+  _librosCtrl.deleteBook();
 });
 
-// Imprimimos el libro por consola pero no lo añadimos
-/*router.post('/books', function(req,res){
-  var libro = req.body;
-  console.log(libro);
-  res.status(200).send();
-});*/
-
-// MODIFICAR UN REGISTRO
-router.put('/books/:id', function(req,res){
-  var id_libro = req.params.id; // id del libro que queremos modificar
-  var libro = req.body; // Obtiene el libro modificado que nosotros mandamos
-  /* Si imprimimos directamente libro veremos "object", para ver su contenido,
-      debemos utilizar la funcion JSON.stringify(object); */
-  console.log("id ->" + id_libro + " libro " + JSON.stringify(libro));
-
-  // Recorremos el array de libros para encontrar el libro que queremos modificar
-  libros.forEach(function (elemento, indice, array) {
-    if(indice == id_libro) {
-      console.log("Localizado " + elemento.title + " --- " + libro.title);
-      elemento.title = libro.title;
-      elemento.autor = libro.autor;
-    }
-  })
-  res.status(200).jsonp(libros); //Le contestamos ok y devolvemos los libros
-  // Podemos acceder directamente al libro desde el array
-  // console.log(libros[id_libro]);
-});
-
-router.delete('/books/:id', function(req,res){
-  // Como la posición coincide con el id, podemos utilizarlo directamente en la funcion slice;
-  libros.splice(req.params.id,1);
-  res.status(200).jsonp(libros); //Le contestamos ok y devolvemos los libros
+// PETICIONES PUT
+// Modificar un libro
+router.put('/books/:id',function(req,res,next){
+  var _librosCtrl = new libroCtrl(req,res,next);
+  _librosCtrl.updateBookById();
 });
